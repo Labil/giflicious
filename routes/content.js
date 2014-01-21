@@ -6,16 +6,21 @@ function ContentHandler(db){
 
 	this.displayMainPage = function(req, res, next){
 
-		contentFetcher.getGifs(25, function(err, result){
+		contentFetcher.scrapeReddit(function(loaded){
+			if(!loaded) return next(err);
 
-			if(err) return next(err);
+			contentFetcher.getGifs(25, function(err, result){
 
-			return res.render('index', {
-				title: 'Giflicious',
-				gifs: result
+				if(err) return next(err);
+
+				return res.render('index', {
+					title: 'Giflicious',
+					gifs: result
+				});
 			});
 		});
-	}
+
+	};
 
 }
 
