@@ -18,7 +18,11 @@ function ContentFetcher(db){
 			callback(err, documents);
 			
 		});
-	}
+	};
+
+	/*this.scrapeReddit = function(callback){
+
+	}*/
 
 }
 
