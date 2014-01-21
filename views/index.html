@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+	<head>
+	<title>{{ title }}</title>
+	<link rel="stylesheet" type="text/css" href="/css/style.css" />
+	</head>
+<body>
+	<h1><center>{{title}} - Robot chicken style!</center> </h1>
+	{% for gif in gifs %}
+		<img src="{{gif.url}}" height="250" title="{{gif.title}}" />
+	{% endfor %}
+</body>
+</html>
+
+
