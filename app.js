@@ -9,7 +9,11 @@ var routes = require('./routes'); //this gets index.js, which takes care of all 
 //var request = require('request');
 //var _ = require('underscore');
 
-MongoClient.connect('mongodb://localhost:27017/giflicious', function(err, db){
+var mongoUri = process.env.MONGOLAB_URI ||
+  process.env.MONGOHQ_URL ||
+  'mongodb://localhost:27017/giflicious';
+
+MongoClient.connect(mongoUri, function(err, db){
 	if(err) throw err;
 
 	app.engine('html', cons.swig);
