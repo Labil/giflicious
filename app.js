@@ -1,5 +1,5 @@
 var apptitle = 'Giflicious';
-var port = '8080';
+var port = '5000'; //Heroku deploys on port 5000, therefore the app has to use this as well
 
 var express = require('express');
 var app = express();
