@@ -21,13 +21,10 @@ function ContentFetcher(db){
 			
 		});
 	};
-
+	//Callback true when we have finished scraping and inserting new gifs to the db from reddit
 	this.scrapeReddit = function(callback){
 
 		var gifData = {};
-		var indicesToSplice = [];
-		var namesToSplice = [];
-		var goodGifs = [];
 
 		request('http://www.reddit.com/r/gifs/.json', function(error, response, body){
 			if(!error && response.statusCode == 200){
@@ -48,36 +45,19 @@ function ContentFetcher(db){
 					collection.insert(goodGifs, {upsert:true}, function(err, data){
 						if(err) throw err;
 						if(data){
-							for(var j = 0; j < data.length; j++)
-								console.dir("Inserting gif:" + data[j].title + " to database.");
 							callback(true);
 						}
 				//		db.close();
 					});
 				}
-				else {  //Should be fixed, here there is no safety or checking that we actually have data
+				//Even tho we haven't inserted anything new to the db, we still want the calling
+				//code to fetch whatever's in there from before and display that, so callback(true)
+				else {
 					callback(true);
 				}
 			};
-
-			/*var cleanUp = function(){
-
-				for(var i = 0; i < gifData.length; i++){
-					var foundMatch = false;
-					for(var j = 0; j < namesToSplice.length; j++){
-						if(gifData[i].title == namesToSplice[j]){
-							console.log("Removing: " + gifData[i].title);
-							foundMatch = true;
-						}
-					}
-					if(!foundMatch){
-						goodGifs.push(gifData[i]);
-					}
-				}
-				console.log("gif.length at time before isnert: " + goodGifs.length);
-				insertGifsToDB();
-			};*/
-
+			
+			var goodGifs = [];
 			var finished = _.after(gifData.length, insertGifsToDB);
 
 			var isUrlGood = function(url){
@@ -106,21 +86,6 @@ function ContentFetcher(db){
 					goodGifs.push(gifData[i]);
 					finished();
 				}
-				/*if(gifData[i].url.search('.gif') == -1 && gifData[i].url.search('.png') == -1){
-					namesToSplice.push(gifData[i].title);
-					finished();
-				}*/
-				/*else{
-					console.log("Gonna test for gif with name: " + gifData[i].title);
-					collection.findOne({ "title":gifData[i].title}, function(err, match){
-						if(err) throw err;
-						if(match){
-							console.log("Found match on gif title: " + match.title);
-							namesToSplice.push(match.title);
-						}
-						finished();
-					});	
-				}*/
 			}
 		});
 
