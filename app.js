@@ -24,7 +24,7 @@ MongoClient.connect(mongoUri, function(err, db){
 
 	routes(app, db); //application routes in index.js
 	
-	app..listen(process.env.PORT || port)
-	console.log('Express server started listening on port ' + port);
+	app.listen(process.env.PORT || port)
+	console.log('Express server started listening on port');
 
 }); 
