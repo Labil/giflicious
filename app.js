@@ -1,3 +1,10 @@
+//TODO:
+//		- Nicer font title and description
+//		- Fetch random gifs from DB
+//		- Show stats about what type of tags/nsfw/popular words in titles etc
+//		- Search for gifs with keyword in title
+//		- Multiple pages (1 2 3 4 5 etc) with max 20/25 per page ---maybe less, five? To decrease loading. Make it a preference
+
 var apptitle = 'Giflicious';
 var port = '5000'; //Heroku deploys on port 5000, therefore the app has to use this as well
 
@@ -6,8 +13,6 @@ var app = express();
 var cons = require('consolidate'); //templating lib
 var MongoClient = require('mongodb').MongoClient; //mongo driver
 var routes = require('./routes'); //this gets index.js, which takes care of all the routing (could also be written './routes/index.js')
-//var request = require('request');
-//var _ = require('underscore');
 
 var mongoUri = process.env.MONGOLAB_URI ||
   process.env.MONGOHQ_URL ||

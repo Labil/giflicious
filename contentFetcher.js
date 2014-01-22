@@ -59,7 +59,6 @@ function ContentFetcher(db){
 
 			var bestGifs = [];
 			var removeExisting = function(){
-				console.log("Calling removeExisting");
 				for(var i = 0; i < goodGifs.length; i++){
 					var test = true;
 					for(var j = 0; j < usedGifNames.length; j++){
@@ -87,16 +86,11 @@ function ContentFetcher(db){
 			var finished = _.after(goodGifs.length, removeExisting);
 
 			var usedGifNames = [];
-			console.log(goodGifs.length);
 			for(var i = 0; i < goodGifs.length; i++){
 				collection.findOne({ "title":goodGifs[i].title}, function(err, match){
 					if(err) throw err;
 					if(match){
 						usedGifNames.push(match.title);
-						console.log("Gif already in database");
-					}
-					else{
-						console.log("Gif not in db");
 					}
 					finished();
 				});	
