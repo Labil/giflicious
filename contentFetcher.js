@@ -40,9 +40,9 @@ function ContentFetcher(db){
 				});
 			}
 
-			var insertGifsToDB = function(){
-				if(goodGifs.length > 0){
-					collection.insert(goodGifs, {upsert:true}, function(err, data){
+			var insertGifsToDB = function(gifs){
+				if(gifs.length > 0){
+					collection.insert(gifs, {upsert:true}, function(err, data){
 						if(err) throw err;
 						if(data){
 							callback(true);
@@ -56,36 +56,50 @@ function ContentFetcher(db){
 					callback(true);
 				}
 			};
+
+			var bestGifs = [];
+			var removeExisting = function(){
+				console.log("Calling removeExisting");
+				for(var i = 0; i < goodGifs.length; i++){
+					var test = true;
+					for(var j = 0; j < usedGifNames.length; j++){
+						if(goodGifs[i].title == usedGifNames[j]){
+							test = false;
+						}
+					}
+					if(test)
+						bestGifs.push(goodGifs[i]);
+				}
+				insertGifsToDB(bestGifs);
+			}
 			
 			var goodGifs = [];
-			var finished = _.after(gifData.length, insertGifsToDB);
 
 			var isUrlGood = function(url){
 				return (url.search('.gif') != -1 || url.search('.png') != -1);
 			};
-
-			var isGifNew = function(title){
-				console.log("Gonna test for gif with name: " + title);
-				collection.findOne({ "title":title}, function(err, match){
-					if(err) throw err;
-					return match == null;
-				});	
-			};
-
 			//Removes invalid gifs and gifs that already exists in db			
 			for(var i = 0; i < gifData.length; i++){
-				var isGifGood = true;
-
-				if(!isUrlGood(gifData[i].url)){
-					finished();
-				}
-				else if(!isGifNew(gifData[i].title)){
-					finished();
-				}
-				else {
+				if(isUrlGood(gifData[i].url)){
 					goodGifs.push(gifData[i]);
-					finished();
 				}
+			}
+			var finished = _.after(goodGifs.length, removeExisting);
+
+			var usedGifNames = [];
+			console.log(goodGifs.length);
+			for(var i = 0; i < goodGifs.length; i++){
+				collection.findOne({ "title":goodGifs[i].title}, function(err, match){
+					if(err) throw err;
+					if(match){
+						usedGifNames.push(match.title);
+						console.log("Gif already in database");
+					}
+					else{
+						console.log("Gif not in db");
+					}
+					finished();
+				});	
 			}
 		});
 
