@@ -23,7 +23,11 @@ function ContentFetcher(db){
 	};
 
 	this.scrapeReddit = function(callback){
+
 		var gifData = {};
+		var indicesToSplice = [];
+		var namesToSplice = [];
+		var goodGifs = [];
 
 		request('http://www.reddit.com/r/gifs/.json', function(error, response, body){
 			if(!error && response.statusCode == 200){
@@ -40,9 +44,8 @@ function ContentFetcher(db){
 			}
 
 			var insertGifsToDB = function(){
-				console.log("gifData.length at insertion point: " + gifData.length);
-				if(gifData.length > 0){
-					collection.insert(gifData, {upsert:true}, function(err, data){
+				if(goodGifs.length > 0){
+					collection.insert(goodGifs, {upsert:true}, function(err, data){
 						if(err) throw err;
 						if(data){
 							for(var j = 0; j < data.length; j++)
@@ -56,38 +59,68 @@ function ContentFetcher(db){
 					callback(true);
 				}
 			};
-			var removeGifs = function(){
-				for(var k = 0; k < indicesToSplice.length; k++){
-					gifData.splice(indicesToSplice[k], 1);
+
+			/*var cleanUp = function(){
+
+				for(var i = 0; i < gifData.length; i++){
+					var foundMatch = false;
+					for(var j = 0; j < namesToSplice.length; j++){
+						if(gifData[i].title == namesToSplice[j]){
+							console.log("Removing: " + gifData[i].title);
+							foundMatch = true;
+						}
+					}
+					if(!foundMatch){
+						goodGifs.push(gifData[i]);
+					}
 				}
-				console.log("Gifs after removing: " + gifData.length);
+				console.log("gif.length at time before isnert: " + goodGifs.length);
 				insertGifsToDB();
+			};*/
+
+			var finished = _.after(gifData.length, insertGifsToDB);
+
+			var isUrlGood = function(url){
+				return (url.search('.gif') != -1 || url.search('.png') != -1);
 			};
 
-			var finished = _.after(gifData.length, removeGifs);
+			var isGifNew = function(title){
+				console.log("Gonna test for gif with name: " + title);
+				collection.findOne({ "title":title}, function(err, match){
+					if(err) throw err;
+					return match == null;
+				});	
+			};
 
-			//Removes invalid gifs and gifs that already exists in db
-			//Loops backwards, if not the splice will get fucked up cause we're looping in the same direction as we're removing items
-			var i = gifData.length;
-			var indicesToSplice = [];
-			while(i--){
-				if(gifData[i].url.search('.gif') == -1 && gifData[i].url.search('.png') == -1){
-					console.log("Found invalid gif, removing");
-					//gifData.splice(i, 1);
-					indicesToSplice.push(i);
+			//Removes invalid gifs and gifs that already exists in db			
+			for(var i = 0; i < gifData.length; i++){
+				var isGifGood = true;
+
+				if(!isUrlGood(gifData[i].url)){
 					finished();
 				}
-				else{
+				else if(!isGifNew(gifData[i].title)){
+					finished();
+				}
+				else {
+					goodGifs.push(gifData[i]);
+					finished();
+				}
+				/*if(gifData[i].url.search('.gif') == -1 && gifData[i].url.search('.png') == -1){
+					namesToSplice.push(gifData[i].title);
+					finished();
+				}*/
+				/*else{
+					console.log("Gonna test for gif with name: " + gifData[i].title);
 					collection.findOne({ "title":gifData[i].title}, function(err, match){
 						if(err) throw err;
 						if(match){
 							console.log("Found match on gif title: " + match.title);
-							indicesToSplice.push(i);
+							namesToSplice.push(match.title);
 						}
 						finished();
 					});	
-				}
-				
+				}*/
 			}
 		});
 
@@ -96,27 +129,3 @@ function ContentFetcher(db){
 }
 
 module.exports.ContentFetcher = ContentFetcher;
-
-/*function ContentFetcher(db){
-
-	//The constructor needs to be called by the "new" keyword, so that "this" points to the global object
-	if((this instanceof ContentFetcher === false)){
-		return new ContentFetcher(db); 
-	}
-
-	this.collection = db.collection("gifs");
-
-}
-
-ContentFetcher.prototype.getGifs = function(num, callback){
-
-	this.collection.find().sort('created', -1).limit(num).toArray(function(err, gifs){
-
-		if(err) return callback(err, null);
-		console.log("Found" + gifs.length + " gifs");
-
-		callback(err, gifs);
-	});
-}
-
-module.exports.ContentFetcher = ContentFetcher;*/

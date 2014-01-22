@@ -5,10 +5,14 @@
 	<link rel="stylesheet" type="text/css" href="/css/style.css" />
 	</head>
 <body>
-	<h1><center>{{title}} - Robot chicken style!</center> </h1>
-	{% for gif in gifs %}
-		<img src="{{gif.url}}" height="250" title="{{gif.title}}" />
-	{% endfor %}
+	
+	<div id="contentwrapper">
+		<h1 class="center">{{title}}</h1>
+		<p class="center">Robot chicken style gifs galore. Straight from <a href="http://www.reddit.com/r/gifs" target="_blank">r/gifs</a></p>
+		{% for gif in gifs %}
+				<img class="gif" src="{{gif.url}}" title="{{gif.title}}" alt="{{gif.title}}" />
+		{% endfor %}
+	</div>
 </body>
 </html>
 

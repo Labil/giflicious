@@ -25,25 +25,3 @@ function ContentHandler(db){
 }
 
 module.exports = ContentHandler;
-
-
-/*function ContentHandler(db){
-	
-	this.contentFetcher = new ContentFetcher(db);
-
-}
-
-ContentHandler.prototype.displayMainPage = function(req, res, next){
-
-	this.contentFetcher.getGifs(1, function(err, results){
-
-		if(err) return next(err);
-
-		return res.render('index', {
-			title: 'Giflicious',
-			gifs: results
-		});
-	});
-}
-
-module.exports = ContentHandler;*/
